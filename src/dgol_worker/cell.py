@@ -1,0 +1,28 @@
+from ..dgol_support import CellState
+
+
+class Cell:
+    def __init__(self, position=None, state=None):
+        self.position = position
+        if state is None:
+            self.state = CellState.DEAD
+        elif isinstance(state, CellState):
+            self.state = state
+        elif isinstance(state, str):
+            if state.lower() == "alive":
+                self.state = CellState.ALIVE
+            elif state.lower() == "dead":
+                self.state = CellState.DEAD
+
+    def __repr__(self):
+        return f"Cell({repr(self.position)}, {repr(self.state)})"
+
+    # Cells are equal if they occupy the same position
+    def __eq__(self, other):
+        return self.position == other.position
+
+    def __hash__(self):
+        return hash(self.position)
+
+    def __del__(self):
+        pass
