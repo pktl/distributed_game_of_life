@@ -10,15 +10,14 @@ class CellEnv:
         self.positions = set()
         # Map positions to Cell objects
         self.cells = dict()
-        self.ctx = zmq.Context()
-        self._launch_server()
+        self.cmd_server = CmdServer()
 
     def __repr__(self):
         return "\n".join([repr(c) for c in self.cells])
 
     def create_cell(self,
                     position: Position,
-                    state: Union[CellState, str, bool] = CellState.DEAD):
+                    state: Union[CellState, str] = CellState.DEAD):
         if position not in self.positions:
             self.positions.add(position)
             self.cells[position] = Cell(position, state)
@@ -28,15 +27,18 @@ class CellEnv:
             self.positions.remove(position)
             del self.cells[position]
 
-    def _launch_server(self):
-        rep = self.ctx.socket(zmq.REP)
-        rep.bind("tcp://*:5555")
-        self._server_loop(rep)
 
-    def _server_loop(self, reply_socket):
+class CmdServer:
+    def __init__(self, port: int = 5555):
+        self.ctx = zmq.Context()
+        self.rep = self.ctx.socket(zmq.REP)
+        self.rep.bind(f"tcp://*:{port}")
+        #self._server_loop(self.rep)
+
+    def _server_loop(self):
         while True:
-            msg = reply_socket.recv_json()
-            reply_socket.send_json(self._reply_to(msg))
+            msg = self.rep.recv_json()
+            self.rep.send_json(self._reply_to(msg))
 
     def _reply_to(self, msg_json):
         msg_dict = json.loads(msg_json)
