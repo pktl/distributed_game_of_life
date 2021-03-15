@@ -13,3 +13,6 @@ class CellState(Enum):
 
     def __repr__(self):
         return f"CellState.{self.name}"
+
+
+Position = tuple[int, ...]

@@ -1,7 +1,8 @@
 import zmq
 import json
+from typing import Union
 from ..dgol_worker.cell import Cell
-from ..dgol_support import CellState
+from ..dgol_support import CellState, Position
 
 
 class CellEnv:
@@ -15,12 +16,14 @@ class CellEnv:
     def __repr__(self):
         return "\n".join([repr(c) for c in self.cells])
 
-    def create_cell(self, position, state=CellState.DEAD):
+    def create_cell(self,
+                    position: Position,
+                    state: Union[CellState, str, bool] = CellState.DEAD):
         if position not in self.positions:
             self.positions.add(position)
             self.cells[position] = Cell(position, state)
 
-    def delete_cell(self, position):
+    def delete_cell(self, position: Position):
         if position in self.positions:
             self.positions.remove(position)
             del self.cells[position]
@@ -38,6 +41,6 @@ class CellEnv:
     def _reply_to(self, msg_json):
         msg_dict = json.loads(msg_json)
         if msg_dict["cmd"] == "create_cell":
-            self.create_cell(tuple(msg_dict["args"][0]))
+            self.create_cell(msg_dict["args"][0])
             reply = {"status": "success", "reply_to": msg_json}
             return json.dumps(reply)

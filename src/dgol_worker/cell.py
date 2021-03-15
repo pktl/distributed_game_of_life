@@ -1,12 +1,12 @@
-from ..dgol_support import CellState
+from ..dgol_support import CellState, Position
 
 
 class Cell:
-    def __init__(self, position=None, state=None):
+    def __init__(self,
+                 position: Position,
+                 state: CellState = CellState.DEAD):
         self.position = position
-        if state is None:
-            self.state = CellState.DEAD
-        elif isinstance(state, CellState):
+        if isinstance(state, CellState):
             self.state = state
         elif isinstance(state, str):
             if state.lower() == "alive":
