@@ -1,4 +1,5 @@
 import zmq
+import json
 from ..dgol_worker.cell import Cell
 from ..dgol_support import CellState
 
@@ -9,7 +10,7 @@ class CellEnv:
         # Map positions to Cell objects
         self.cells = dict()
         self.ctx = zmq.Context()
-        self._connect_to_master()
+        self._launch_server()
 
     def __repr__(self):
         return "\n".join([repr(c) for c in self.cells])
@@ -24,19 +25,20 @@ class CellEnv:
             self.positions.remove(position)
             del self.cells[position]
 
-    def _connect_to_master(self):
+    def _launch_server(self):
         rep = self.ctx.socket(zmq.REP)
         rep.bind("tcp://*:5555")
-        self._recv_loop(rep)
+        self._server_loop(rep)
 
-    def _recv_loop(self, reply_socket):
+    def _server_loop(self, reply_socket):
         while True:
-            msg = reply_socket.recv_string()
-            if msg == "q":
-                break
-            else:
-                self._message_handler(msg)
-            reply_socket.send_string("ACK")
+            msg = reply_socket.recv_json()
+            reply_socket.send_json(self._reply_to(msg))
 
-    def _message_handler(self, msg):
+    def _reply_to(self, msg):
         print(msg)
+        obj = json.loads(msg)
+        if obj["cmd"] == "create_cell":
+            print(obj["position"])
+            obj["reply"] = "success"
+            return json.dumps(obj)

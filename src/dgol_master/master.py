@@ -1,4 +1,5 @@
 import zmq
+import json
 
 
 class Master:
@@ -10,9 +11,7 @@ class Master:
 
     def _ui(self):
         while inp := input():
-            if inp.lower() == "q":
-                self.cell_env_req.send_string("q")
-                break
-            elif inp.lower() == "c":
-                self.cell_env_req.send_string("TEST")
-            print(self.cell_env_req.recv_string())
+            if inp.lower() == "c":
+                self.cell_env_req.send_json(json.dumps({
+                    "cmd": "create_cell", "position": (0, 1)}))
+            print(self.cell_env_req.recv_json())
