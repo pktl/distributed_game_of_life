@@ -35,10 +35,9 @@ class CellEnv:
             msg = reply_socket.recv_json()
             reply_socket.send_json(self._reply_to(msg))
 
-    def _reply_to(self, msg):
-        print(msg)
-        obj = json.loads(msg)
-        if obj["cmd"] == "create_cell":
-            print(obj["position"])
-            obj["reply"] = "success"
-            return json.dumps(obj)
+    def _reply_to(self, msg_json):
+        msg_dict = json.loads(msg_json)
+        if msg_dict["cmd"] == "create_cell":
+            self.create_cell(tuple(msg_dict["args"][0]))
+            reply = {"status": "success", "reply_to": msg_json}
+            return json.dumps(reply)

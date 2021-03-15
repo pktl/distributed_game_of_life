@@ -13,5 +13,5 @@ class Master:
         while inp := input():
             if inp.lower() == "c":
                 self.cell_env_req.send_json(json.dumps({
-                    "cmd": "create_cell", "position": (0, 1)}))
+                    "cmd": "create_cell", "args": [(0, 1)]}))
             print(self.cell_env_req.recv_json())
